@@ -10,7 +10,8 @@ import { cn } from '../lib/utils';
 export default function Layout() {
   const menuItems = [
     { to: '/', label: 'Bảng Điều Khiển', icon: Activity },
-    { to: '/estimating', label: 'Bóc Khối Lượng AI', icon: Calculator },
+    { to: '/estimating', label: 'Ước Tính Nhanh (m²)', icon: Calculator },
+    { to: '/takeoff', label: 'Bóc Vật Tư (Định mức)', icon: Package },
     { to: '/hr', label: 'Nhân Sự & Lương', icon: Users },
     { to: '/finance', label: 'Kế Toán & Thu Chi', icon: DollarSign },
     { to: '/crm', label: 'Khách Hàng & HĐ', icon: FileText },

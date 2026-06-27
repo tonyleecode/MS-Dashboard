@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import EstimationTool from './pages/EstimationTool';
+import MaterialTakeoff from './pages/MaterialTakeoff';
 import HRManagement from './pages/HRManagement';
 import FinancialManagement from './pages/FinancialManagement';
 import CRMContracts from './pages/CRMContracts';
@@ -17,6 +18,7 @@ export default function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={<Dashboard />} />
           <Route path="estimating" element={<EstimationTool />} />
+          <Route path="takeoff" element={<MaterialTakeoff />} />
           <Route path="hr" element={<HRManagement />} />
           <Route path="finance" element={<FinancialManagement />} />
           <Route path="crm" element={<CRMContracts />} />
