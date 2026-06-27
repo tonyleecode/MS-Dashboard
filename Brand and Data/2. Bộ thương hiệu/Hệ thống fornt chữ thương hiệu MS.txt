@@ -1,0 +1,40 @@
+﻿1. Nhóm Tiêu điểm (Gây ấn tượng & Khẳng định sự vững chắc)
+Nhóm này dùng phông chữ Montserrat để tạo sự góc cạnh, kết cấu vững như nền móng.
+● Tiêu đề (H1): * Phông chữ: Montserrat
+○ Độ đậm (Weight): Extra Bold (Rất đậm) hoặc Black.
+○ Kiểu chữ: Viết hoa toàn bộ (UPPERCASE).
+○ Lý do: Tạo cảm giác quyền lực, bề thế cho tên dự án hoặc thông điệp chính.
+● Tiêu đề phụ (H2):
+○ Phông chữ: Montserrat
+○ Độ đậm: Bold (Đậm).
+○ Kiểu chữ: Viết hoa chữ cái đầu (Sentence case).
+○ Lý do: Hỗ trợ tiêu đề chính, làm rõ nghĩa nhưng không lấn át.
+2. Nhóm Cấu trúc (Phân chia thông tin rõ ràng)
+Nhóm này vẫn dùng Montserrat nhưng giảm độ đậm xuống để tạo sự thanh thoát (Mind).
+● Đề mục (H3):
+○ Phông chữ: Montserrat
+○ Độ đậm: Semi Bold (Bán đậm).
+○ Lý do: Phân chia các phần chính của bài viết/trang web (VD: "Dịch vụ", "Bảng giá").
+● Đề mục phụ (H4):
+○ Phông chữ: Montserrat
+○ Độ đậm: Medium (Vừa).
+○ Lý do: Dùng cho các mục nhỏ hơn bên trong đề mục chính.
+3. Nhóm Chi tiết & Nội dung (Đề cao sự minh bạch, dễ đọc)
+Từ đoạn này trở xuống, chúng ta chuyển sang phông chữ Inter để khách hàng đọc các văn bản dài, báo giá, hoặc chi tiết kỹ thuật mà không bị mỏi mắt.
+● Tiêu đề mục (H5 - Điểm nhấn nội dung):
+○ Phông chữ: Inter
+○ Độ đậm: Bold (Đậm).
+○ Lý do: Làm nổi bật các gạch đầu dòng hoặc tính năng cụ thể (VD: "Bảo hành 5 năm", "Vật tư chính hãng").
+● Nội dung (Body Text - Văn bản chính):
+○ Phông chữ: Inter
+○ Độ đậm: Regular (Bình thường).
+○ Lý do: Đảm bảo tính minh bạch, hiển thị cực kỳ rõ ràng trên cả điện thoại và máy tính.
+● Trích dẫn (Quote):
+○ Phông chữ: Inter
+○ Độ đậm/Kiểu: Regular + Italic (In nghiêng) hoặc Medium + Italic.
+○ Lý do: Thể hiện lời hứa của thương hiệu, triết lý kinh doanh hoặc feedback của khách hàng một cách mềm mại, có điểm nhấn.
+● Chú thích (Caption/Footnote):
+○ Phông chữ: Inter
+○ Độ đậm: Light (Mảnh) hoặc Regular.
+○ Lý do: Dùng cho các ghi chú dưới hình ảnh công trình hoặc các điều khoản nhỏ, không làm rối mắt tổng thể.
+

@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "xaydungms",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["vite", "--port", "3000", "--host"],
+      "port": 3000,
+      "cwd": "D:\\Project\\xaydungms.vn\\xaydungms.vn-main"
+    }
+  ]
+}

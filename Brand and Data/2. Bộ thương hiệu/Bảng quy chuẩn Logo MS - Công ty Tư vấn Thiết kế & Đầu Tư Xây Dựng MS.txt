@@ -1,0 +1,16 @@
+﻿Bản vẽ kỹ thuật (Grid System) 
+
+● Hệ lưới (Grid): Được chia theo tỷ lệ bội số của 56px. ( 2016px x 2016px )
+● Độ dày nét tiêu chuẩn (Stroke/Thick): 56px cho các trụ đứng của chữ M và độ dày của bụng chữ S.
+● Mô tả cấu trúc: Logo là sự kết hợp hình học đan xen giữa chữ M cách điệu thành mái nhà (tượng trưng cho Construction) và chữ S uốn lượn (tượng trưng cho Design).
+Quy chuẩn Màu sắc (Color Palette): #1a4460 , #d36c2b, #707d84
+● Màu Xanh sẫm (Primary Blue): Mã HEX (#1a4460), Thông số RGB, Thông số in ấn CMYK.
+● Màu Cam (Accent Orange): Nằm ở chữ V lõi, thể hiện điểm nhấn. Lấy mã HEX (#d36c2b) , RGB, CMYK.
+● Màu Xám (Neutral Grey): Nằm ở chữ S. Lấy mã HEX (#707d84), RGB, CMYK.
+Quy chuẩn Phông chữ (Typography): Tên Font chính: Nhóm font Montserrat.
+● Tên thương hiệu "MIND & SOLID": Sử dụng định dạng Black.
+● Slogan "DESIGN & CONSTRUCTION": Sử dụng định dạng Medium, với khoảng cách chữ (Tracking) được dãn rộng bằng mép Tên thương hiệu.
+Khoảng cách an toàn (Clear Space): Quy định một vùng bao quanh logo mà không có bất kỳ chữ hay hình ảnh nào khác được lấn vào. Thường người ta sẽ lấy một ô vuông kích thước 56px (bằng độ dày của cột chữ M) để làm thước đo xung quanh.
+
+
+	Designer						Bên sở hữu	
