@@ -6,7 +6,9 @@
 
 import { GoogleGenAI, Type } from '@google/genai';
 
-export const GEMINI_MODEL = 'gemini-2.5-flash';
+// 2.5-pro đọc bản vẽ kỹ/đầy đủ hơn 2.5-flash (chậm & tốn hơn — đổi lại độ chính xác).
+// Đổi về 'gemini-2.5-flash' nếu cần nhanh/rẻ.
+export const GEMINI_MODEL = 'gemini-2.5-pro';
 
 export interface InlinePart { data: string; mimeType: string }
 
