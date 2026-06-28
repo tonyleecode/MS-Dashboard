@@ -1,17 +1,13 @@
 // ============================================================================
-// LỚP 1 — AI ĐỌC BẢN VẼ → BẢNG KHỐI LƯỢNG CẤU KIỆN (BOQ)
-// Dùng Gemini (vision) đọc PDF/ảnh bản vẽ kỹ thuật, trả về danh sách cấu kiện
-// có khối lượng để LỚP 2 (takeoff.ts) quy đổi ra vật tư.
+// LỚP 1 (CLIENT) — Gửi bản vẽ lên MÁY CHỦ /api/doc-ban-ve để AI bóc tách.
+// KEY GEMINI NẰM Ở MÁY CHỦ, không nhúng vào trình duyệt. Client chỉ đọc file
+// thành base64, gọi API, rồi chuẩn hoá kết quả về kiểu CauKien.
 //
-// LƯU Ý QUAN TRỌNG: AI đọc bản vẽ raster có thể sai số. Kết quả LUÔN cần kỹ
-// thuật viên rà soát/sửa trong bảng trước khi tính vật tư. Mọi chỗ không chắc
-// chắn được AI ghi vào `canhBao`.
+// LƯU Ý: AI đọc bản vẽ raster có thể sai số — kết quả LUÔN cần kỹ thuật viên
+// rà soát/sửa trong bảng trước khi tính vật tư. Chỗ không chắc ghi vào canhBao.
 // ============================================================================
 
-import { GoogleGenAI, Type } from '@google/genai';
 import type { CauKien } from './takeoff';
-
-export const GEMINI_MODEL = 'gemini-2.5-flash';
 
 export interface ThongTinCongTrinh {
   ten: string;
@@ -46,87 +42,23 @@ const fileToInline = (file: File): Promise<{ data: string; mimeType: string }> =
     reader.readAsDataURL(file);
   });
 
-const PROMPT = `Bạn là kỹ sư bóc tách khối lượng (QS) công trình nhà ở dân dụng Việt Nam, nắm vững TCVN 5574:2018 (BTCT), TCVN 1651:2018 (cốt thép), TCVN 9362/10304 (nền móng).
-Bạn nhận được các BẢN VẼ KỸ THUẬT (mặt bằng các tầng, bản vẽ MÓNG, mặt cắt, kết cấu cột/dầm/sàn, thống kê thép...).
-Hãy ĐỌC và BÓC TÁCH thành danh sách CẤU KIỆN có khối lượng, để hệ thống quy đổi ra vật tư theo định mức Nhà nước.
-
-KIẾN THỨC CHUYÊN MÔN (dùng để chọn mặc định hợp lý khi bản vẽ không ghi rõ):
-- Mác bê tông theo cấu kiện nhà dân dụng: LÓT móng/nền = M100 (đá 4x6); MÓNG/ĐÀ KIỀNG/CỘT/DẦM/SÀN/CẦU THANG/LANH TÔ nhà thấp tầng = M250 (đá 1x2, cấp bền B20); nhà nhiều tầng/chịu lực lớn có thể M300 (B22.5). Nếu bản vẽ ghi cấp bền B: B15→M200, B20→M250, B22.5→M300, B25→M350.
-- Cốt thép: thép VẰN CB300/CB400 cho thép chịu lực (Ø≥10); thép TRƠN CB240 cho đai/cấu tạo (Ø6, Ø8). Đường kính ghi dạng Ø/D/Φ + số mm.
-- Tường nhà phố: tường BAO/mặt tiền dày 20cm (tường 20); tường NGĂN dày 10cm (tường 10). Gạch ống 8x8x18 phổ biến.
-- Móng: CỌC có cọc + đài; BĂNG là dải liên tục dưới tường; ĐƠN là đài rời dưới cột; BÈ là tấm phủ toàn bộ.
-
-NGUYÊN TẮC BÓC TÁCH:
-1. Kích thước trên bản vẽ thường bằng mm — QUY ĐỔI sang mét khi tính.
-2. THỂ TÍCH bê tông (m³): Cột/đà = rộng×sâu×dài×số lượng. Sàn = diện tích×bề dày (sàn nhà phố thường dày 0.1m). Móng = dài×rộng×cao×số lượng.
-3. DIỆN TÍCH tường (m²) theo từng bề dày, trừ diện tích cửa nếu đọc được.
-4. DIỆN TÍCH tô/trát (m²) + số mặt (tường trong 2 mặt, tường ngoài 1 mặt).
-5. THÉP: nếu có bảng thống kê thép → ghi theo đường kính (phi) + tổng chiều dài (m) HOẶC khối lượng (kg). Nếu chỉ thấy "4Ø16/cột" → ước tính chiều dài = số cây × chiều cao × số cấu kiện, CỘNG thép đai. Tách riêng từng phi.
-6. Mỗi cấu kiện = 1 dòng "cauKiens", "ten" tiếng Việt rõ (vd "Cột tầng trệt 20×20").
-7. Số liệu suy đoán/không chắc/thiếu bản vẽ → THÊM dòng vào "canhBao" (vd "Chưa thấy thống kê thép sàn — ước tính Ø10@200 2 lớp").
-8. Nếu KHÔNG phải bản vẽ công trình → isBanVe=false.
-
-Trả về JSON đúng schema. Số không đọc được để 0, chuỗi để "".`;
-
 export async function docBanVe(files: File[]): Promise<KetQuaDocBanVe> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) throw new Error('Chưa cấu hình GEMINI_API_KEY. Vào .env (hoặc Secrets) đặt khóa rồi chạy lại.');
-
   const parts = await Promise.all(files.map(fileToInline));
-  const ai = new GoogleGenAI({ apiKey });
 
-  const response = await ai.models.generateContent({
-    model: GEMINI_MODEL,
-    contents: [{
-      parts: [
-        ...parts.map((p) => ({ inlineData: { data: p.data, mimeType: p.mimeType } })),
-        { text: PROMPT },
-      ],
-    }],
-    config: {
-      responseMimeType: 'application/json',
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          isBanVe: { type: Type.BOOLEAN },
-          thongTin: {
-            type: Type.OBJECT,
-            properties: {
-              ten: { type: Type.STRING },
-              rongM: { type: Type.NUMBER },
-              daiM: { type: Type.NUMBER },
-              soTang: { type: Type.NUMBER },
-            },
-            required: ['ten', 'rongM', 'daiM', 'soTang'],
-          },
-          cauKiens: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                loai: { type: Type.STRING, description: 'betong | thep | xay | to' },
-                ten: { type: Type.STRING },
-                mac: { type: Type.STRING, description: 'M100|M150|M200|M250|M300 (cho bê tông)' },
-                theTich: { type: Type.NUMBER, description: 'm³ (bê tông)' },
-                phi: { type: Type.NUMBER, description: 'mm (thép)' },
-                chieuDaiM: { type: Type.NUMBER, description: 'tổng mét (thép)' },
-                khoiLuongKg: { type: Type.NUMBER, description: 'kg (thép, nếu biết)' },
-                dienTich: { type: Type.NUMBER, description: 'm² (xây/tô)' },
-                chieuDay: { type: Type.NUMBER, description: 'm (xây)' },
-                chieuDayCm: { type: Type.NUMBER, description: 'cm (tô)' },
-                soMat: { type: Type.NUMBER, description: '1 hoặc 2 (tô)' },
-              },
-              required: ['loai', 'ten'],
-            },
-          },
-          canhBao: { type: Type.ARRAY, items: { type: Type.STRING } },
-        },
-        required: ['isBanVe', 'thongTin', 'cauKiens', 'canhBao'],
-      },
-    },
+  const res = await fetch('/api/doc-ban-ve', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ files: parts }),
   });
 
-  const raw = JSON.parse(response.text || '{}');
+  if (!res.ok) {
+    let msg = `Lỗi máy chủ (${res.status})`;
+    try { const j = await res.json(); if (j?.error) msg = j.error; } catch {}
+    if (res.status === 413) msg = 'Bản vẽ quá lớn để gửi lên máy chủ. Hãy tách bớt trang hoặc giảm dung lượng.';
+    throw new Error(msg);
+  }
+
+  const raw = await res.json();
   return {
     isBanVe: raw.isBanVe !== false,
     thongTin: raw.thongTin ?? { ten: '', rongM: 0, daiM: 0, soTang: 0 },
