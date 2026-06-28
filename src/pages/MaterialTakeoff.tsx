@@ -1,12 +1,13 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Upload, Loader2, Plus, Trash2, AlertTriangle, Box, Layers, Columns3,
-  PaintRoller, Calculator, Info, FileSpreadsheet,
+  PaintRoller, Calculator, Info, FileSpreadsheet, Wallet,
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { bocTachVatTu, CauKien } from '../lib/takeoff';
 import { docBanVe } from '../lib/aiDocReader';
 import { exportTakeoffExcel } from '../lib/exportExcel';
+import { tinhThanhTien, loadDonGia, saveDonGia, DON_GIA_META, DonGiaVatTu } from '../lib/donGiaVatTu';
 import type { MacBeTong } from '../lib/dinhMuc';
 
 const MAC_OPTIONS: MacBeTong[] = ['M100', 'M150', 'M200', 'M250', 'M300'];
@@ -30,6 +31,12 @@ export default function MaterialTakeoff() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const ketQua = useMemo(() => bocTachVatTu(cauKiens), [cauKiens]);
+
+  const [donGia, setDonGia] = useState<DonGiaVatTu>(() => loadDonGia());
+  const [showGia, setShowGia] = useState(false);
+  useEffect(() => { saveDonGia(donGia); }, [donGia]);
+  const thanhTien = useMemo(() => tinhThanhTien(ketQua, donGia), [ketQua, donGia]);
+  const fmtVnd = (n: number) => Math.round(n).toLocaleString('vi-VN');
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files: File[] = e.target.files ? Array.from(e.target.files) : [];
@@ -243,10 +250,42 @@ export default function MaterialTakeoff() {
               </div>
             )}
 
+            {/* Chi phí vật tư (VL) */}
+            <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+              <div className="p-md bg-surface-container-low border-b border-outline-variant flex items-center justify-between">
+                <h3 className="font-bold text-h3 text-primary-container flex items-center gap-xs"><Wallet size={18} className="text-[#d36c2b]" /> Chi phí vật tư (VL)</h3>
+                <button onClick={() => setShowGia((v) => !v)} className="text-[12px] font-bold text-primary-container hover:underline">{showGia ? 'Ẩn đơn giá' : 'Sửa đơn giá'}</button>
+              </div>
+              <div className="p-md">
+                <div className="flex items-baseline justify-between">
+                  <span className="text-on-surface-variant text-body-md">Tổng tiền vật tư</span>
+                  <span className="text-h1 text-[#d36c2b] font-extrabold">{fmtVnd(thanhTien.tong)} đ</span>
+                </div>
+                {showGia && (
+                  <div className="mt-md grid grid-cols-1 gap-xs border-t border-outline-variant pt-md">
+                    <div className="text-[11px] uppercase text-on-surface-variant font-bold mb-1">Đơn giá (sửa theo thị trường — tự lưu)</div>
+                    {DON_GIA_META.map((m) => (
+                      <div key={m.key} className="flex items-center justify-between gap-sm">
+                        <span className="text-body-md text-on-surface flex-1">{m.ten}</span>
+                        <input
+                          type="number"
+                          value={donGia[m.key] || ''}
+                          onChange={(e) => setDonGia((p) => ({ ...p, [m.key]: parseFloat(e.target.value) || 0 }))}
+                          className="w-32 bg-surface border border-outline rounded-md py-1 px-sm text-body-md text-right outline-none focus:ring-1 focus:ring-primary-container"
+                        />
+                        <span className="text-[11px] text-on-surface-variant w-12">{m.dvt}</span>
+                      </div>
+                    ))}
+                    <div className="text-[11px] text-on-surface-variant mt-1">* Chỉ tính tiền VẬT LIỆU. Chưa gồm nhân công, máy, gián tiếp, thuế.</div>
+                  </div>
+                )}
+              </div>
+            </div>
+
             <button
               onClick={() => {
                 if (cauKiens.length === 0) { setThongBao({ type: 'err', msg: 'Chưa có cấu kiện để xuất. Tải bản vẽ hoặc nhập tay trước.' }); return; }
-                exportTakeoffExcel(tenCT, cauKiens);
+                exportTakeoffExcel(tenCT, cauKiens, donGia);
               }}
               disabled={cauKiens.length === 0}
               className={cn(

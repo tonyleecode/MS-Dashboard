@@ -6,6 +6,7 @@
 import * as XLSX from 'xlsx';
 import { bocTachVatTu, CauKien } from './takeoff';
 import { TRONG_LUONG_THEP_KG_M } from './dinhMuc';
+import { tinhThanhTien, DonGiaVatTu, DON_GIA_MAC_DINH } from './donGiaVatTu';
 
 const r2 = (n: number, d = 2) => Math.round(n * 10 ** d) / 10 ** d;
 
@@ -43,7 +44,7 @@ function autoCols(rows: any[][]): XLSX.ColInfo[] {
   return widths.map((w) => ({ wch: w }));
 }
 
-export function exportTakeoffExcel(tenCT: string, cauKiens: CauKien[]) {
+export function exportTakeoffExcel(tenCT: string, cauKiens: CauKien[], donGia: DonGiaVatTu = DON_GIA_MAC_DINH) {
   const kq = bocTachVatTu(cauKiens);
   const ngay = new Date().toLocaleDateString('vi-VN');
   const wb = XLSX.utils.book_new();
@@ -116,6 +117,19 @@ export function exportTakeoffExcel(tenCT: string, cauKiens: CauKien[]) {
   const wsTH = XLSX.utils.aoa_to_sheet(thRows);
   wsTH['!cols'] = [{ wch: 26 }, { wch: 10 }, { wch: 14 }];
   XLSX.utils.book_append_sheet(wb, wsTH, 'Tổng hợp vật tư');
+
+  // --- Sheet 5: Tổng hợp kinh phí vật tư (THKP) ---
+  const tt = tinhThanhTien(kq, donGia);
+  const kpRows: any[][] = [['STT', 'Vật tư', 'ĐVT', 'Khối lượng', 'Đơn giá (đ)', 'Thành tiền (đ)']];
+  tt.dong.forEach((d, i) => kpRows.push([i + 1, d.ten, d.dvt, r2(d.khoiLuong), d.donGia, d.thanhTien]));
+  kpRows.push(['', 'CỘNG CHI PHÍ VẬT TƯ (VL)', '', '', '', tt.tong]);
+  kpRows.push([]);
+  kpRows.push(['Ghi chú:', 'Đơn giá là giá tham khảo, cập nhật theo thị trường / công bố giá địa phương.']);
+  kpRows.push(['', 'Đây là chi phí VẬT LIỆU (VL). Chưa gồm nhân công (NC), máy thi công (MTC),']);
+  kpRows.push(['', 'chi phí gián tiếp, thu nhập chịu thuế tính trước và thuế GTGT (theo TT 11/2021/TT-BXD).']);
+  const wsKP = XLSX.utils.aoa_to_sheet(kpRows);
+  wsKP['!cols'] = [{ wch: 6 }, { wch: 30 }, { wch: 8 }, { wch: 12 }, { wch: 14 }, { wch: 16 }];
+  XLSX.utils.book_append_sheet(wb, wsKP, 'Tổng hợp kinh phí');
 
   // --- Xuất file ---
   const safe = (tenCT || 'cong-trinh').replace(/[^\p{L}\p{N}]+/gu, '-').slice(0, 40);

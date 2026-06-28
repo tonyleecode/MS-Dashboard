@@ -46,20 +46,25 @@ const fileToInline = (file: File): Promise<{ data: string; mimeType: string }> =
     reader.readAsDataURL(file);
   });
 
-const PROMPT = `Bạn là kỹ sư bóc tách khối lượng (QS) công trình nhà ở dân dụng Việt Nam.
+const PROMPT = `Bạn là kỹ sư bóc tách khối lượng (QS) công trình nhà ở dân dụng Việt Nam, nắm vững TCVN 5574:2018 (BTCT), TCVN 1651:2018 (cốt thép), TCVN 9362/10304 (nền móng).
 Bạn nhận được các BẢN VẼ KỸ THUẬT (mặt bằng các tầng, bản vẽ MÓNG, mặt cắt, kết cấu cột/dầm/sàn, thống kê thép...).
-Hãy ĐỌC và BÓC TÁCH thành danh sách CẤU KIỆN có khối lượng, để hệ thống quy đổi ra vật tư.
+Hãy ĐỌC và BÓC TÁCH thành danh sách CẤU KIỆN có khối lượng, để hệ thống quy đổi ra vật tư theo định mức Nhà nước.
 
-NGUYÊN TẮC:
-1. Kích thước trên bản vẽ thường tính bằng mm — QUY ĐỔI sang mét khi tính.
-2. Tính THỂ TÍCH bê tông (m³) cho: móng, đà kiềng, cột, dầm, sàn, cầu thang, lanh tô. Mác mặc định M250 (đá 1x2), bê tông lót M100 (đá 4x6).
-   - Cột/đà: rộng×sâu×dài×số lượng. Sàn: diện tích×bề dày. Móng: dài×rộng×cao×số lượng.
-3. Tính DIỆN TÍCH tường (m²) theo từng bề dày (tường 10 = 0.1m, tường 20 = 0.2m). Trừ diện tích cửa nếu đọc được.
-4. Tính DIỆN TÍCH tô/trát (m²), ghi số mặt (thường tô 2 mặt tường trong, 1 mặt ngoài).
-5. THÉP: nếu có bảng thống kê thép, ghi theo đường kính (phi) + tổng chiều dài (m) HOẶC khối lượng (kg). Nếu chỉ thấy "Fi16 4 cây/cột", hãy ước tính chiều dài = số cây × chiều cao cấu kiện.
-6. Mỗi cấu kiện là 1 dòng trong "cauKiens". Đặt "ten" tiếng Việt rõ ràng (vd "Cột tầng trệt 20×20").
-7. Với BẤT KỲ số liệu nào suy đoán/không chắc chắn, THÊM một dòng mô tả vào "canhBao" (vd "Chưa thấy bản vẽ móng — bỏ qua thép móng").
-8. Nếu tài liệu KHÔNG phải bản vẽ công trình, đặt isBanVe=false.
+KIẾN THỨC CHUYÊN MÔN (dùng để chọn mặc định hợp lý khi bản vẽ không ghi rõ):
+- Mác bê tông theo cấu kiện nhà dân dụng: LÓT móng/nền = M100 (đá 4x6); MÓNG/ĐÀ KIỀNG/CỘT/DẦM/SÀN/CẦU THANG/LANH TÔ nhà thấp tầng = M250 (đá 1x2, cấp bền B20); nhà nhiều tầng/chịu lực lớn có thể M300 (B22.5). Nếu bản vẽ ghi cấp bền B: B15→M200, B20→M250, B22.5→M300, B25→M350.
+- Cốt thép: thép VẰN CB300/CB400 cho thép chịu lực (Ø≥10); thép TRƠN CB240 cho đai/cấu tạo (Ø6, Ø8). Đường kính ghi dạng Ø/D/Φ + số mm.
+- Tường nhà phố: tường BAO/mặt tiền dày 20cm (tường 20); tường NGĂN dày 10cm (tường 10). Gạch ống 8x8x18 phổ biến.
+- Móng: CỌC có cọc + đài; BĂNG là dải liên tục dưới tường; ĐƠN là đài rời dưới cột; BÈ là tấm phủ toàn bộ.
+
+NGUYÊN TẮC BÓC TÁCH:
+1. Kích thước trên bản vẽ thường bằng mm — QUY ĐỔI sang mét khi tính.
+2. THỂ TÍCH bê tông (m³): Cột/đà = rộng×sâu×dài×số lượng. Sàn = diện tích×bề dày (sàn nhà phố thường dày 0.1m). Móng = dài×rộng×cao×số lượng.
+3. DIỆN TÍCH tường (m²) theo từng bề dày, trừ diện tích cửa nếu đọc được.
+4. DIỆN TÍCH tô/trát (m²) + số mặt (tường trong 2 mặt, tường ngoài 1 mặt).
+5. THÉP: nếu có bảng thống kê thép → ghi theo đường kính (phi) + tổng chiều dài (m) HOẶC khối lượng (kg). Nếu chỉ thấy "4Ø16/cột" → ước tính chiều dài = số cây × chiều cao × số cấu kiện, CỘNG thép đai. Tách riêng từng phi.
+6. Mỗi cấu kiện = 1 dòng "cauKiens", "ten" tiếng Việt rõ (vd "Cột tầng trệt 20×20").
+7. Số liệu suy đoán/không chắc/thiếu bản vẽ → THÊM dòng vào "canhBao" (vd "Chưa thấy thống kê thép sàn — ước tính Ø10@200 2 lớp").
+8. Nếu KHÔNG phải bản vẽ công trình → isBanVe=false.
 
 Trả về JSON đúng schema. Số không đọc được để 0, chuỗi để "".`;
 
