@@ -6,6 +6,7 @@ import {
 import { cn } from '../lib/utils';
 import { bocTachVatTu, CauKien } from '../lib/takeoff';
 import { docBanVe } from '../lib/aiDocReader';
+import { exportTakeoffExcel } from '../lib/exportExcel';
 import type { MacBeTong } from '../lib/dinhMuc';
 
 const MAC_OPTIONS: MacBeTong[] = ['M100', 'M150', 'M200', 'M250', 'M300'];
@@ -243,9 +244,16 @@ export default function MaterialTakeoff() {
             )}
 
             <button
-              onClick={() => alert('Xuất Excel bảng tiên lượng + tổng hợp vật tư — sẽ bổ sung ở bước sau.')}
-              className="w-full bg-[#d36c2b] text-white font-bold py-md rounded-xl flex items-center justify-center gap-sm hover:opacity-90 transition-opacity shadow-md">
-              <FileSpreadsheet size={18} /> Xuất bảng vật tư (.xlsx)
+              onClick={() => {
+                if (cauKiens.length === 0) { setThongBao({ type: 'err', msg: 'Chưa có cấu kiện để xuất. Tải bản vẽ hoặc nhập tay trước.' }); return; }
+                exportTakeoffExcel(tenCT, cauKiens);
+              }}
+              disabled={cauKiens.length === 0}
+              className={cn(
+                'w-full bg-[#d36c2b] text-white font-bold py-md rounded-xl flex items-center justify-center gap-sm hover:opacity-90 transition-opacity shadow-md',
+                cauKiens.length === 0 && 'opacity-50 cursor-not-allowed'
+              )}>
+              <FileSpreadsheet size={18} /> Xuất Excel kiểu G8 (.xlsx)
             </button>
 
             <div className="bg-[#fff9f6] border border-[#ffd3c2] text-[#b54708] p-md rounded-lg text-body-md flex items-start gap-sm">
