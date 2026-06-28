@@ -6,3 +6,10 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Tách khỏi repo dashboard (dữ liệu/website/dự toán cũ)
+/Brand and Data/
+/Data-Chuyen-Xay-Dung/
+/xaydungms.vn-main/
+/xaydungms-web/
+/MS-du-toan-main/
