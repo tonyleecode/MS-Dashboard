@@ -95,7 +95,7 @@ export function exportTakeoffExcel(tenCT: string, cauKiens: CauKien[], donGia: D
 
   // --- Sheet 4: Tổng hợp vật tư ---
   const thRows: any[][] = [['VẬT TƯ', 'ĐVT', 'KHỐI LƯỢNG']];
-  thRows.push(['Thép xây dựng (tổng)', 'kg', r2(kq.thepKg)]);
+  thRows.push([kq.thepLaUocTinh ? 'Thép xây dựng (ƯỚC TÍNH theo hàm lượng)' : 'Thép xây dựng (tổng)', 'kg', r2(kq.thepKg)]);
   Object.entries(kq.thepTheoPhi).sort((a, b) => +a[0] - +b[0]).forEach(([phi, kg]) =>
     thRows.push([`  - Thép Ø${phi}`, 'kg', r2(Number(kg))]));
   thRows.push(['Xi măng PCB40', 'bao 50kg', kq.ximangBao]);

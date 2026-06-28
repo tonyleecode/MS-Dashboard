@@ -225,7 +225,7 @@ export default function MaterialTakeoff() {
                 <span className="bg-primary-container text-on-primary text-[9px] px-sm py-[2px] rounded font-bold uppercase">ĐM Nhà nước</span>
               </div>
               <div className="p-md space-y-sm">
-                <Stat name="Thép xây dựng" val={`${fmt(ketQua.thepKg)} kg`} sub={`${fmt(ketQua.thepTan, 3)} tấn`} />
+                <Stat name={ketQua.thepLaUocTinh ? 'Thép (ước tính)' : 'Thép xây dựng'} val={`${fmt(ketQua.thepKg)} kg`} sub={`${fmt(ketQua.thepTan, 3)} tấn${ketQua.thepLaUocTinh ? ' · theo hàm lượng' : ''}`} />
                 <Stat name="Xi măng PCB40" val={`${ketQua.ximangBao} bao`} sub={`${fmt(ketQua.ximangKg)} kg`} />
                 <Stat name="Cát vàng" val={`${fmt(ketQua.catM3)} m³`} />
                 <Stat name="Đá dăm" val={`${fmt(ketQua.daM3)} m³`} sub={Object.entries(ketQua.daTheoLoai).map(([k, v]) => `đá ${k}: ${fmt(Number(v))}`).join(' · ')} />
@@ -236,6 +236,13 @@ export default function MaterialTakeoff() {
                 <Stat name="Tô trát" val={`${fmt(ketQua.toM2)} m²`} small />
               </div>
             </div>
+
+            {ketQua.thepLaUocTinh && ketQua.thepKg > 0 && (
+              <div className="bg-[#fff9f6] border border-[#ffd3c2] text-[#b54708] p-md rounded-lg text-body-md flex items-start gap-sm">
+                <AlertTriangle className="shrink-0 mt-0.5" size={16} />
+                <span><b>Thép đang là ƯỚC TÍNH</b> theo hàm lượng (kg thép/m³ bê tông) vì bản vẽ chưa có bảng thống kê thép. Cần đối chiếu bản vẽ kết cấu để có số chính xác.</span>
+              </div>
+            )}
 
             {Object.keys(ketQua.thepTheoPhi).length > 0 && (
               <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-md">

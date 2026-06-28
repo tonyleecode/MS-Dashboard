@@ -69,6 +69,34 @@ export const DINH_MUC_TO = {
   vuaPerM2PerCm: 0.0107, // m³ vữa / (m² × 1cm bề dày), đã gồm hao hụt nhẹ
 };
 
+/** Hàm lượng cốt thép sơ bộ (kg thép / m³ bê tông) theo loại cấu kiện nhà dân
+ *  dụng — dùng để ƯỚC TÍNH thép khi bản vẽ KHÔNG có bảng thống kê thép.
+ *  Đây là số liệu sơ bộ phổ biến trong dự toán nhà phố; cần kiểm tra bản vẽ
+ *  kết cấu để có số chính xác. */
+export const HAM_LUONG_THEP_KG_M3 = {
+  lot: 0,     // bê tông lót: không có thép
+  mong: 100,  // móng, cọc, đài
+  cot: 150,   // cột
+  dam: 160,   // dầm, đà, kèo, giằng, lanh tô
+  san: 90,    // sàn, đan, bản, tấm
+  khac: 110,
+};
+
+/** Phân loại 1 cấu kiện bê tông theo tên để tra hàm lượng thép. */
+export function phanLoaiBeTong(ten: string): keyof typeof HAM_LUONG_THEP_KG_M3 {
+  const s = (ten || '').toLowerCase();
+  if (s.includes('lót') || s.includes('lot')) return 'lot';
+  if (s.includes('cột') || s.includes('cot')) return 'cot';
+  if (s.includes('dầm') || s.includes('dam') || s.includes('đà') || s.includes('kèo') ||
+      s.includes('keo') || s.includes('giằng') || s.includes('giang') || s.includes('lanh tô') || s.includes('lanh to'))
+    return 'dam';
+  if (s.includes('sàn') || s.includes('san') || s.includes('đan') || s.includes('bản') || s.includes('tấm') || s.includes('tam'))
+    return 'san';
+  if (s.includes('móng') || s.includes('mong') || s.includes('cọc') || s.includes('coc') || s.includes('đài'))
+    return 'mong';
+  return 'khac';
+}
+
 /** Hệ số hao hụt vật tư (nhân thêm khi tổng hợp). */
 export const HAO_HUT = {
   ximang: 1.01,

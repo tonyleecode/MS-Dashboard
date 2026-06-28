@@ -24,10 +24,10 @@ NGUYÊN TẮC BÓC TÁCH:
 1. Kích thước trên bản vẽ thường bằng mm — QUY ĐỔI sang mét khi tính.
 2. THỂ TÍCH bê tông (m³): Cột/đà = rộng×sâu×dài×số lượng. Sàn = diện tích×bề dày (sàn nhà phố thường dày 0.1m). Móng = dài×rộng×cao×số lượng.
 3. DIỆN TÍCH tường (m²) theo từng bề dày, trừ diện tích cửa nếu đọc được.
-4. DIỆN TÍCH tô/trát (m²) + số mặt (tường trong 2 mặt, tường ngoài 1 mặt).
-5. THÉP: nếu có bảng thống kê thép → ghi theo đường kính (phi) + tổng chiều dài (m) HOẶC khối lượng (kg). Nếu chỉ thấy "4Ø16/cột" → ước tính chiều dài = số cây × chiều cao × số cấu kiện, CỘNG thép đai. Tách riêng từng phi.
+4. loai "to" = CHỈ tô/TRÁT bằng VỮA XI MĂNG và láng/lót vữa. TUYỆT ĐỐI KHÔNG xếp lát gạch, ốp gạch, trần thạch cao/nhựa, chống thấm, sơn bả, hồ dầu vào "to" (chúng KHÔNG dùng vữa xi măng trong công cụ này) — nếu thấy thì chỉ ghi vào "canhBao". Diện tích tô tường trong 2 mặt, tường ngoài 1 mặt; kiểm tra cho hợp lý (đừng phóng đại).
+5. THÉP — BẮT BUỘC có: mỗi cấu kiện BTCT chịu lực (móng/cột/dầm/đà/sàn) PHẢI có thép. Nếu có bảng thống kê thép → ghi theo đường kính (phi) + tổng chiều dài (m) hoặc khối lượng (kg), tách từng phi. Nếu KHÔNG đọc được thống kê thép → vẫn ƯỚC TÍNH: xuất dòng "thep" với khoiLuongKg = (thể tích bê tông cấu kiện) × hàm lượng thép [móng ~100, cột ~150, dầm/đà ~160, sàn ~90 kg/m³], và ghi 1 dòng canhBao "thép ước tính theo hàm lượng".
 6. Mỗi cấu kiện = 1 dòng "cauKiens", "ten" tiếng Việt rõ (vd "Cột tầng trệt 20×20").
-7. Số liệu suy đoán/không chắc/thiếu bản vẽ → THÊM dòng vào "canhBao" (vd "Chưa thấy thống kê thép sàn — ước tính Ø10@200 2 lớp").
+7. Số liệu suy đoán/không chắc/thiếu bản vẽ → THÊM dòng vào "canhBao".
 8. Nếu KHÔNG phải bản vẽ công trình → isBanVe=false.
 
 Trả về JSON đúng schema. Số không đọc được để 0, chuỗi để "".`;

@@ -8,6 +8,7 @@
 import {
   CAP_PHOI_BE_TONG, CAP_PHOI_VUA, TRONG_LUONG_THEP_KG_M,
   DINH_MUC_XAY, DINH_MUC_TO, HAO_HUT, KG_PER_BAO_XIMANG,
+  HAM_LUONG_THEP_KG_M3, phanLoaiBeTong,
   MacBeTong, MacVua,
 } from './dinhMuc';
 
@@ -70,6 +71,7 @@ export interface KetQuaBocTach {
   thepKg: number;
   thepTan: number;
   thepTheoPhi: Record<number, number>; // kg theo từng phi
+  thepLaUocTinh: boolean; // true = thép ước tính theo hàm lượng (AI chưa đọc được thống kê thép)
   // số liệu khối lượng trung gian (để in bảng tiên lượng)
   beTongM3: number;
   beTongTheoMac: Record<string, number>;
@@ -87,7 +89,7 @@ export function bocTachVatTu(cauKiens: CauKien[]): KetQuaBocTach {
   const gachTheoLoai: Record<string, number> = {};
   const thepTheoPhi: Record<number, number> = {};
   const beTongTheoMac: Record<string, number> = {};
-  let beTongM3 = 0, tuongM3 = 0, toM2 = 0, gachVien = 0, thepKg = 0;
+  let beTongM3 = 0, tuongM3 = 0, toM2 = 0, gachVien = 0, thepKg = 0, thepUocTinh = 0;
 
   const addDa = (loai: string, m3: number) => { daTheoLoai[loai] = (daTheoLoai[loai] || 0) + m3; };
   const addGach = (loai: string, vien: number) => { gachTheoLoai[loai] = (gachTheoLoai[loai] || 0) + vien; };
@@ -102,6 +104,8 @@ export function bocTachVatTu(cauKiens: CauKien[]): KetQuaBocTach {
         ximang += cp.ximang * ck.theTich;
         cat += cp.cat * ck.theTich;
         addDa(cp.loaiDa, cp.da * ck.theTich);
+        // ước tính thép theo hàm lượng (dùng khi bản vẽ không có thống kê thép)
+        thepUocTinh += ck.theTich * HAM_LUONG_THEP_KG_M3[phanLoaiBeTong(ck.ten)];
         break;
       }
       case 'thep': {
@@ -143,6 +147,10 @@ export function bocTachVatTu(cauKiens: CauKien[]): KetQuaBocTach {
     }
   }
 
+  // Thép: ưu tiên số đọc được từ bản vẽ; nếu không có → dùng số ước tính theo hàm lượng.
+  let thepLaUocTinh = false;
+  if (thepKg <= 0 && thepUocTinh > 0) { thepKg = thepUocTinh; thepLaUocTinh = true; }
+
   // Áp hao hụt
   ximang *= HAO_HUT.ximang;
   cat *= HAO_HUT.cat;
@@ -156,7 +164,7 @@ export function bocTachVatTu(cauKiens: CauKien[]): KetQuaBocTach {
   const ximangBao = ximang / KG_PER_BAO_XIMANG;
 
   const bangVatTu: DongVatTu[] = [
-    { ten: 'Thép xây dựng các loại', donVi: 'kg', khoiLuong: round(thepKg) },
+    { ten: thepLaUocTinh ? 'Thép xây dựng (ước tính)' : 'Thép xây dựng các loại', donVi: 'kg', khoiLuong: round(thepKg) },
     { ten: 'Xi măng PCB40', donVi: 'bao (50kg)', khoiLuong: Math.ceil(ximangBao) },
     { ten: 'Cát (cát vàng)', donVi: 'm³', khoiLuong: round(cat) },
     { ten: 'Đá dăm', donVi: 'm³', khoiLuong: round(daM3) },
@@ -168,7 +176,7 @@ export function bocTachVatTu(cauKiens: CauKien[]): KetQuaBocTach {
     catM3: round(cat),
     daM3: round(daM3), daTheoLoai: mapRound(daTheoLoai),
     gachVien: Math.round(gachVien), gachTheoLoai: mapRound(gachTheoLoai, 0),
-    thepKg: round(thepKg), thepTan: round(thepKg / 1000, 3), thepTheoPhi: mapRound(thepTheoPhi),
+    thepKg: round(thepKg), thepTan: round(thepKg / 1000, 3), thepTheoPhi: mapRound(thepTheoPhi), thepLaUocTinh,
     beTongM3: round(beTongM3), beTongTheoMac: mapRound(beTongTheoMac),
     tuongM3: round(tuongM3), toM2: round(toM2),
     bangVatTu,
